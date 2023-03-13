@@ -95,3 +95,7 @@ export const elementIsInputRange = ($el) => {
     const selector = 'input[type="range"]';
     return elementHasSelector($el, selector);
 };
+export const elementHasTouchableParent = ($el) => {
+    const selector = '[data-scroll-lock-touchable]';
+    return !!findParentBySelector($el, selector);
+};

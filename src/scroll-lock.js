@@ -12,6 +12,7 @@ import {
     elementIsScrollableField,
     elementHasSelector,
     elementIsInputRange,
+    elementHasTouchableParent,
 } from './tools';
 
 const FILL_GAP_AVAILABLE_METHODS = ['padding', 'margin', 'width', 'max-width', 'none'];
@@ -19,6 +20,7 @@ const TOUCH_DIRECTION_DETECT_OFFSET = 3;
 
 const state = {
     scroll: true,
+    preventTouchMove: false,
     queue: 0,
     scrollableSelectors: ['[data-scroll-lock-scrollable]'],
     lockableSelectors: ['body', '[data-scroll-lock-lockable]'],
@@ -376,10 +378,12 @@ const onTouchStart = (e) => {
     if (!state.scroll) {
         state.startTouchY = e.touches[0].clientY;
         state.startTouchX = e.touches[0].clientX;
+
+        state.preventTouchMove = elementHasTouchableParent(e.target)
     }
 };
 const onTouchMove = (e) => {
-    if (!state.scroll) {
+    if (!state.scroll && !state.preventTouchMove) {
         const { startTouchY, startTouchX } = state;
         const currentClientY = e.touches[0].clientY;
         const currentClientX = e.touches[0].clientX;
@@ -461,6 +465,8 @@ const onTouchEnd = (e) => {
         state.startTouchY = 0;
         state.startTouchX = 0;
     }
+
+    state.preventTouchMove = false;
 };
 
 if (typeof window !== 'undefined') {
@@ -469,7 +475,7 @@ if (typeof window !== 'undefined') {
 if (typeof document !== 'undefined') {
     document.addEventListener('touchstart', onTouchStart);
     document.addEventListener('touchmove', onTouchMove, {
-        passive: false,
+        passive: false
     });
     document.addEventListener('touchend', onTouchEnd);
 }
